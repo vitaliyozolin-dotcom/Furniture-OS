@@ -3,7 +3,7 @@ import { calculateCabinet } from './domain/calculateCabinet';
 import type { CabinetConfig, CabinetSection } from './domain/types';
 import './styles.css';
 
-const defaultSections: CabinetSection[] = [
+const initialSections: CabinetSection[] = [
   { type: 'shelves', shelves: 4, drawers: 0 },
   { type: 'wardrobe', shelves: 1, drawers: 3 },
   { type: 'shelves', shelves: 4, drawers: 0 },
@@ -11,92 +11,98 @@ const defaultSections: CabinetSection[] = [
 
 const money = (value: number) => `${Math.round(value).toLocaleString('ru-RU')} ₽`;
 
+function CabinetPreview({ open }: { open: boolean }) {
+  return (
+    <div className={`cabinet-stage ${open ? 'is-open' : ''}`}>
+      <div className="cabinet-shadow" />
+      <div className="cabinet-shell">
+        <div className="cabinet-inside">
+          <div className="bay bay-left"><i/><i/><i/><i/></div>
+          <div className="bay bay-center"><span className="rail"/><b/><b/><b/></div>
+          <div className="bay bay-right"><i/><i/><i/><i/></div>
+        </div>
+        <div className="door door-left"><span/></div>
+        <div className="door door-center"><span/></div>
+        <div className="door door-right"><span/></div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
-  const [config, setConfig] = useState<CabinetConfig>({
+  const [config] = useState<CabinetConfig>({
     width: 2400,
     height: 2400,
     depth: 600,
-    sections: defaultSections,
+    sections: initialSections,
     bodyMaterial: 'sonoma',
     facadeMaterial: 'chipboard',
     marginPercent: 20,
     laborRate: 800,
   });
-  const [selectedSection, setSelectedSection] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [started, setStarted] = useState(false);
   const result = useMemo(() => calculateCabinet(config), [config]);
-
-  const updateDimension = (key: 'width' | 'height' | 'depth', value: number) => {
-    setConfig((current) => ({ ...current, [key]: value }));
-  };
-
-  const setSectionCount = (count: number) => {
-    setConfig((current) => {
-      const sections = Array.from({ length: count }, (_, index) => current.sections[index] ?? { type: 'shelves', shelves: 4, drawers: 0 });
-      return { ...current, sections };
-    });
-    setSelectedSection((index) => Math.min(index, count - 1));
-  };
-
-  const updateSection = (patch: Partial<CabinetSection>) => {
-    setConfig((current) => ({
-      ...current,
-      sections: current.sections.map((section, index) => index === selectedSection ? { ...section, ...patch } : section),
-    }));
-  };
 
   return (
     <main className="app-shell">
       <header className="topbar">
-        <div><strong>FURNITURE OS</strong><span>Cabinet Engine 0.1</span></div>
-        <button onClick={() => localStorage.setItem('furniture-os-project', JSON.stringify(config))}>Сохранить</button>
+        <button className="icon-button" aria-label="Меню">☰</button>
+        <div className="brand"><strong>Furniture OS</strong><span>Новый проект</span></div>
+        <button className="avatar" aria-label="Профиль">В</button>
       </header>
 
-      <section className="workspace">
-        <aside className="panel controls">
-          <h2>Параметры шкафа</h2>
-          <div className="dimension-grid">
-            {(['width', 'height', 'depth'] as const).map((key) => (
-              <label key={key}>{key === 'width' ? 'Ширина' : key === 'height' ? 'Высота' : 'Глубина'}
-                <input type="number" value={config[key]} onChange={(event) => updateDimension(key, Number(event.target.value))} />
-              </label>
-            ))}
-          </div>
+      <section className="hero-card">
+        <div className="hero-copy">
+          <span className="eyebrow">РАСПАШНОЙ ШКАФ</span>
+          <h1>Создайте шкаф<br/>за 3 минуты</h1>
+          <p>Стоимость, материалы, фурнитура и КП считаются автоматически.</p>
+        </div>
 
-          <h3>Секции</h3>
-          <div className="segment-row">{[1,2,3,4].map((count) => <button className={config.sections.length === count ? 'active' : ''} key={count} onClick={() => setSectionCount(count)}>{count}</button>)}</div>
+        <button className="preview-button" onClick={() => setOpen((value) => !value)} aria-label="Открыть или закрыть фасады">
+          <CabinetPreview open={open} />
+          <span className="preview-hint">{open ? 'Закрыть фасады' : 'Нажмите, чтобы открыть'}</span>
+        </button>
 
-          <div className="section-tabs">{config.sections.map((_, index) => <button className={selectedSection === index ? 'active' : ''} key={index} onClick={() => setSelectedSection(index)}>Секция {index + 1}</button>)}</div>
-          <div className="section-editor">
-            <select value={config.sections[selectedSection].type} onChange={(event) => updateSection({ type: event.target.value as CabinetSection['type'] })}>
-              <option value="shelves">Полки</option><option value="wardrobe">Штанга</option><option value="drawers">Ящики</option>
-            </select>
-            <label>Полки<input type="number" min="0" max="8" value={config.sections[selectedSection].shelves} onChange={(event) => updateSection({ shelves: Number(event.target.value) })} /></label>
-            <label>Ящики<input type="number" min="0" max="6" value={config.sections[selectedSection].drawers} onChange={(event) => updateSection({ drawers: Number(event.target.value) })} /></label>
-          </div>
-
-          <h3>Материалы</h3>
-          <select value={config.bodyMaterial} onChange={(event) => setConfig({ ...config, bodyMaterial: event.target.value as CabinetConfig['bodyMaterial'] })}><option value="sonoma">Дуб Сонома</option><option value="cashmere">Кашемир</option><option value="graphite">Графит</option></select>
-          <select value={config.facadeMaterial} onChange={(event) => setConfig({ ...config, facadeMaterial: event.target.value as CabinetConfig['facadeMaterial'] })}><option value="chipboard">ЛДСП</option><option value="mdf">МДФ</option><option value="mirror">Зеркало</option></select>
-        </aside>
-
-        <section className="panel preview">
-          <div className="cabinet" style={{ aspectRatio: `${config.width}/${config.height}`, gridTemplateColumns: `repeat(${config.sections.length},1fr)` }}>
-            {config.sections.map((section, index) => <div className="cabinet-section" key={index}><div className="section-label">{index + 1}</div>{Array.from({length: section.shelves}).map((_, shelf) => <span className="shelf" key={shelf}/>)}</div>)}
-          </div>
-          <div className="size-label">{config.width} × {config.height} × {config.depth} мм</div>
-        </section>
-
-        <aside className="panel summary">
-          <span className="eyebrow">Цена клиенту</span><div className="total">{money(result.costs.total)}</div>
-          <div className={`status ${result.warnings.length ? 'warning' : ''}`}>{result.warnings[0] ?? 'Базовая инженерная проверка пройдена.'}</div>
-          {Object.entries(result.costs).filter(([key]) => key !== 'total').map(([key,value]) => <div className="summary-row" key={key}><span>{key}</span><b>{money(value)}</b></div>)}
-          <h3>Спецификация</h3>
-          <div className="summary-row"><span>Листы ЛДСП</span><b>{result.sheets}</b></div>
-          <div className="summary-row"><span>Петли</span><b>{result.hinges}</b></div>
-          <div className="summary-row"><span>Направляющие</span><b>{result.runners}</b></div>
-          <div className="summary-row"><span>Срок</span><b>{result.leadDays} дн.</b></div>
-        </aside>
+        <div className="product-meta">
+          <div><span>Габариты</span><strong>{config.width} × {config.height} × {config.depth}</strong><small>мм</small></div>
+          <div><span>Срок</span><strong>{result.leadDays}</strong><small>рабочих дней</small></div>
+        </div>
       </section>
+
+      <section className="price-card">
+        <div>
+          <span>Ориентировочная стоимость</span>
+          <strong>{money(result.costs.total)}</strong>
+        </div>
+        <div className={`safety ${result.warnings.length ? 'warning' : ''}`}>
+          <i />
+          <span>{result.warnings[0] ?? 'Конструкция проверена'}</span>
+        </div>
+      </section>
+
+      <section className="progress-card">
+        <div className="progress-head"><span>Готовность проекта</span><strong>1 из 4</strong></div>
+        <div className="progress-line"><i /></div>
+        <div className="steps">
+          <div className="active"><b>1</b><span>Размеры</span></div>
+          <div><b>2</b><span>Наполнение</span></div>
+          <div><b>3</b><span>Материалы</span></div>
+          <div><b>4</b><span>Итог</span></div>
+        </div>
+      </section>
+
+      <button className="primary-action" onClick={() => setStarted(true)}>
+        <span>{started ? 'Переходим к размерам' : 'Продолжить создание'}</span>
+        <b>→</b>
+      </button>
+      <p className="next-step">Следующий шаг · Размеры шкафа</p>
+
+      <nav className="bottom-nav" aria-label="Основная навигация">
+        <button><span>⌂</span><small>Проекты</small></button>
+        <button className="create"><span>＋</span><small>Новый шкаф</small></button>
+        <button><span>◯</span><small>Кабинет</small></button>
+      </nav>
     </main>
   );
 }
