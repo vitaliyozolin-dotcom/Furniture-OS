@@ -2,24 +2,16 @@
   "name": "furniture-os",
   "private": true,
   "version": "0.1.0",
-  "type": "module",
+  "workspaces": [
+    "apps/web"
+  ],
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "tsc -b && vite build",
-    "test": "vitest run",
-    "preview": "vite --host 0.0.0.0",
-    "typecheck": "tsc -b"
-  },
-  "dependencies": {
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
-  },
-  "devDependencies": {
-    "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.5",
-    "@vitejs/plugin-react": "6.1.0",
-    "typescript": "7.0.2",
-    "vite": "8.2.2",
-    "vitest": "4.1.11"
+    "dev": "npm run dev --workspace @furniture-os/web",
+    "build": "npm run build --workspace @furniture-os/web",
+    "test": "npm run test --workspace @furniture-os/web",
+    "test:e2e": "npm run test:e2e --workspace @furniture-os/web",
+    "test:e2e:update": "npm run test:e2e:update --workspace @furniture-os/web",
+    "preview": "npm run preview --workspace @furniture-os/web",
+    "typecheck": "npm run typecheck --workspace @furniture-os/web"
   }
 }

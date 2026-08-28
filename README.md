@@ -15,6 +15,8 @@ Furniture OS сейчас находится на стадии UI-прототи
 - Vite
 - Vitest
 
+Frontend расположен в `apps/web`. Корневые npm-команды проксируют команды frontend workspace, поэтому локальный workflow после переноса не изменился.
+
 ## Локальный запуск
 
 Требуется Node.js 22 и npm.
@@ -28,11 +30,12 @@ npm run dev
 
 ```sh
 npm test
+npm run test:e2e
 npm run typecheck
 npm run build
 ```
 
-GitHub Actions выполняет эти проверки для pull request. Сборка ветки `main` дополнительно публикуется в GitHub Pages.
+GitHub Actions выполняет эти проверки для pull request. Сборка ветки `main` из `apps/web/dist` дополнительно публикуется в GitHub Pages.
 
 ## Текущие границы
 

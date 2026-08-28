@@ -14,9 +14,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": ["vite/client"],
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom", "node"],
     "jsx": "react-jsx"
   },
-  "include": ["src"],
+  "include": ["src", "vite.config.ts", "playwright.config.ts"],
   "references": []
 }
