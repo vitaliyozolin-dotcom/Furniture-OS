@@ -1,0 +1,528 @@
+[
+  {
+    "id": "standard-cabinet",
+    "description": "Standard cabinet shown by the prototype.",
+    "input": {
+      "width": 2400,
+      "height": 2400,
+      "depth": 600,
+      "sections": [
+        {
+          "type": "shelves",
+          "shelves": 4,
+          "drawers": 0
+        },
+        {
+          "type": "wardrobe",
+          "shelves": 1,
+          "drawers": 3
+        },
+        {
+          "type": "shelves",
+          "shelves": 4,
+          "drawers": 0
+        }
+      ],
+      "bodyMaterial": "sonoma",
+      "facadeMaterial": "chipboard",
+      "marginPercent": 20,
+      "laborRate": 800
+    },
+    "expected": {
+      "parts": [
+        {
+          "name": "Боковина",
+          "width": 2400,
+          "height": 600,
+          "quantity": 2,
+          "material": "body"
+        },
+        {
+          "name": "Крышка",
+          "width": 2368,
+          "height": 600,
+          "quantity": 1,
+          "material": "body"
+        },
+        {
+          "name": "Дно",
+          "width": 2368,
+          "height": 600,
+          "quantity": 1,
+          "material": "body"
+        },
+        {
+          "name": "Задняя стенка",
+          "width": 2368,
+          "height": 2368,
+          "quantity": 1,
+          "material": "back"
+        },
+        {
+          "name": "Перегородка",
+          "width": 2368,
+          "height": 600,
+          "quantity": 2,
+          "material": "body"
+        },
+        {
+          "name": "Полка секции 1",
+          "width": 776.6666666666666,
+          "height": 580,
+          "quantity": 4,
+          "material": "body"
+        },
+        {
+          "name": "Полка секции 2",
+          "width": 776.6666666666666,
+          "height": 580,
+          "quantity": 1,
+          "material": "body"
+        },
+        {
+          "name": "Боковина ящика 2",
+          "width": 450,
+          "height": 160,
+          "quantity": 6,
+          "material": "body"
+        },
+        {
+          "name": "Перед/зад ящика 2",
+          "width": 708.6666666666666,
+          "height": 160,
+          "quantity": 6,
+          "material": "body"
+        },
+        {
+          "name": "Дно ящика 2",
+          "width": 708.6666666666666,
+          "height": 450,
+          "quantity": 3,
+          "material": "back"
+        },
+        {
+          "name": "Полка секции 3",
+          "width": 776.6666666666666,
+          "height": 580,
+          "quantity": 4,
+          "material": "body"
+        },
+        {
+          "name": "Фасад",
+          "width": 797.3333333333334,
+          "height": 2396,
+          "quantity": 3,
+          "material": "facade"
+        }
+      ],
+      "sheets": 3,
+      "hinges": 12,
+      "runners": 3,
+      "rods": 1,
+      "edgeMeters": 51.1,
+      "leadDays": 10,
+      "warnings": [],
+      "costs": {
+        "materials": 28220.74848,
+        "hardware": 10960,
+        "labor": 9904,
+        "delivery": 4500,
+        "margin": 10716.949696,
+        "total": 64301.69817599999
+      }
+    }
+  },
+  {
+    "id": "shallow-with-rod",
+    "description": "Shallow cabinet with a wardrobe rod.",
+    "input": {
+      "width": 2400,
+      "height": 2400,
+      "depth": 450,
+      "sections": [
+        {
+          "type": "shelves",
+          "shelves": 4,
+          "drawers": 0
+        },
+        {
+          "type": "wardrobe",
+          "shelves": 1,
+          "drawers": 3
+        },
+        {
+          "type": "shelves",
+          "shelves": 4,
+          "drawers": 0
+        }
+      ],
+      "bodyMaterial": "sonoma",
+      "facadeMaterial": "chipboard",
+      "marginPercent": 20,
+      "laborRate": 800
+    },
+    "expected": {
+      "parts": [
+        {
+          "name": "Боковина",
+          "width": 2400,
+          "height": 450,
+          "quantity": 2,
+          "material": "body"
+        },
+        {
+          "name": "Крышка",
+          "width": 2368,
+          "height": 450,
+          "quantity": 1,
+          "material": "body"
+        },
+        {
+          "name": "Дно",
+          "width": 2368,
+          "height": 450,
+          "quantity": 1,
+          "material": "body"
+        },
+        {
+          "name": "Задняя стенка",
+          "width": 2368,
+          "height": 2368,
+          "quantity": 1,
+          "material": "back"
+        },
+        {
+          "name": "Перегородка",
+          "width": 2368,
+          "height": 450,
+          "quantity": 2,
+          "material": "body"
+        },
+        {
+          "name": "Полка секции 1",
+          "width": 776.6666666666666,
+          "height": 430,
+          "quantity": 4,
+          "material": "body"
+        },
+        {
+          "name": "Полка секции 2",
+          "width": 776.6666666666666,
+          "height": 430,
+          "quantity": 1,
+          "material": "body"
+        },
+        {
+          "name": "Боковина ящика 2",
+          "width": 450,
+          "height": 160,
+          "quantity": 6,
+          "material": "body"
+        },
+        {
+          "name": "Перед/зад ящика 2",
+          "width": 708.6666666666666,
+          "height": 160,
+          "quantity": 6,
+          "material": "body"
+        },
+        {
+          "name": "Дно ящика 2",
+          "width": 708.6666666666666,
+          "height": 450,
+          "quantity": 3,
+          "material": "back"
+        },
+        {
+          "name": "Полка секции 3",
+          "width": 776.6666666666666,
+          "height": 430,
+          "quantity": 4,
+          "material": "body"
+        },
+        {
+          "name": "Фасад",
+          "width": 797.3333333333334,
+          "height": 2396,
+          "quantity": 3,
+          "material": "facade"
+        }
+      ],
+      "sheets": 3,
+      "hinges": 12,
+      "runners": 3,
+      "rods": 1,
+      "edgeMeters": 42.5,
+      "leadDays": 10,
+      "warnings": [
+        "Глубины недостаточно для стандартной продольной штанги."
+      ],
+      "costs": {
+        "materials": 27893.94848,
+        "hardware": 10960,
+        "labor": 9904,
+        "delivery": 4500,
+        "margin": 10651.589696,
+        "total": 63909.538176
+      }
+    }
+  },
+  {
+    "id": "wide-sections",
+    "description": "Two sections wider than the current prototype limit.",
+    "input": {
+      "width": 2400,
+      "height": 2400,
+      "depth": 600,
+      "sections": [
+        {
+          "type": "shelves",
+          "shelves": 4,
+          "drawers": 0
+        },
+        {
+          "type": "wardrobe",
+          "shelves": 1,
+          "drawers": 3
+        }
+      ],
+      "bodyMaterial": "sonoma",
+      "facadeMaterial": "chipboard",
+      "marginPercent": 20,
+      "laborRate": 800
+    },
+    "expected": {
+      "parts": [
+        {
+          "name": "Боковина",
+          "width": 2400,
+          "height": 600,
+          "quantity": 2,
+          "material": "body"
+        },
+        {
+          "name": "Крышка",
+          "width": 2368,
+          "height": 600,
+          "quantity": 1,
+          "material": "body"
+        },
+        {
+          "name": "Дно",
+          "width": 2368,
+          "height": 600,
+          "quantity": 1,
+          "material": "body"
+        },
+        {
+          "name": "Задняя стенка",
+          "width": 2368,
+          "height": 2368,
+          "quantity": 1,
+          "material": "back"
+        },
+        {
+          "name": "Перегородка",
+          "width": 2368,
+          "height": 600,
+          "quantity": 1,
+          "material": "body"
+        },
+        {
+          "name": "Полка секции 1",
+          "width": 1174,
+          "height": 580,
+          "quantity": 4,
+          "material": "body"
+        },
+        {
+          "name": "Полка секции 2",
+          "width": 1174,
+          "height": 580,
+          "quantity": 1,
+          "material": "body"
+        },
+        {
+          "name": "Боковина ящика 2",
+          "width": 450,
+          "height": 160,
+          "quantity": 6,
+          "material": "body"
+        },
+        {
+          "name": "Перед/зад ящика 2",
+          "width": 1106,
+          "height": 160,
+          "quantity": 6,
+          "material": "body"
+        },
+        {
+          "name": "Дно ящика 2",
+          "width": 1106,
+          "height": 450,
+          "quantity": 3,
+          "material": "back"
+        },
+        {
+          "name": "Фасад",
+          "width": 1197,
+          "height": 2396,
+          "quantity": 2,
+          "material": "facade"
+        }
+      ],
+      "sheets": 3,
+      "hinges": 8,
+      "runners": 3,
+      "rods": 1,
+      "edgeMeters": 44.3,
+      "leadDays": 9,
+      "warnings": [
+        "Секция 1176 мм слишком широкая — нужна перегородка."
+      ],
+      "costs": {
+        "materials": 28357.42168,
+        "hardware": 9640,
+        "labor": 8480,
+        "delivery": 4500,
+        "margin": 10195.484336,
+        "total": 61172.906016
+      }
+    }
+  },
+  {
+    "id": "tall-mdf",
+    "description": "Tall cabinet with MDF facades.",
+    "input": {
+      "width": 2400,
+      "height": 2700,
+      "depth": 600,
+      "sections": [
+        {
+          "type": "shelves",
+          "shelves": 4,
+          "drawers": 0
+        },
+        {
+          "type": "wardrobe",
+          "shelves": 1,
+          "drawers": 3
+        },
+        {
+          "type": "shelves",
+          "shelves": 4,
+          "drawers": 0
+        }
+      ],
+      "bodyMaterial": "sonoma",
+      "facadeMaterial": "mdf",
+      "marginPercent": 20,
+      "laborRate": 800
+    },
+    "expected": {
+      "parts": [
+        {
+          "name": "Боковина",
+          "width": 2700,
+          "height": 600,
+          "quantity": 2,
+          "material": "body"
+        },
+        {
+          "name": "Крышка",
+          "width": 2368,
+          "height": 600,
+          "quantity": 1,
+          "material": "body"
+        },
+        {
+          "name": "Дно",
+          "width": 2368,
+          "height": 600,
+          "quantity": 1,
+          "material": "body"
+        },
+        {
+          "name": "Задняя стенка",
+          "width": 2368,
+          "height": 2668,
+          "quantity": 1,
+          "material": "back"
+        },
+        {
+          "name": "Перегородка",
+          "width": 2668,
+          "height": 600,
+          "quantity": 2,
+          "material": "body"
+        },
+        {
+          "name": "Полка секции 1",
+          "width": 776.6666666666666,
+          "height": 580,
+          "quantity": 4,
+          "material": "body"
+        },
+        {
+          "name": "Полка секции 2",
+          "width": 776.6666666666666,
+          "height": 580,
+          "quantity": 1,
+          "material": "body"
+        },
+        {
+          "name": "Боковина ящика 2",
+          "width": 450,
+          "height": 160,
+          "quantity": 6,
+          "material": "body"
+        },
+        {
+          "name": "Перед/зад ящика 2",
+          "width": 708.6666666666666,
+          "height": 160,
+          "quantity": 6,
+          "material": "body"
+        },
+        {
+          "name": "Дно ящика 2",
+          "width": 708.6666666666666,
+          "height": 450,
+          "quantity": 3,
+          "material": "back"
+        },
+        {
+          "name": "Полка секции 3",
+          "width": 776.6666666666666,
+          "height": 580,
+          "quantity": 4,
+          "material": "body"
+        },
+        {
+          "name": "Фасад",
+          "width": 797.3333333333334,
+          "height": 2696,
+          "quantity": 3,
+          "material": "facade"
+        }
+      ],
+      "sheets": 3,
+      "hinges": 15,
+      "runners": 3,
+      "rods": 1,
+      "edgeMeters": 53,
+      "leadDays": 18,
+      "warnings": [
+        "Высота выше 2600 мм требует проверки транспорта и монтажа."
+      ],
+      "costs": {
+        "materials": 54315.116480000004,
+        "hardware": 11590,
+        "labor": 9904,
+        "delivery": 4500,
+        "margin": 16061.823295999999,
+        "total": 96370.939776
+      }
+    }
+  }
+]

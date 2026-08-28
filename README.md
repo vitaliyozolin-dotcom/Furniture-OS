@@ -7,6 +7,10 @@ Furniture OS сейчас находится на стадии UI-прототи
 - [Продуктовый и архитектурный план](docs/project-plan.md)
 - [План технической миграции без нового функционала](docs/technology-migration-plan.md)
 - [План продуктовой разработки после миграции](docs/product-development-plan.md)
+- [Словарь compatibility-домена](docs/domain-glossary.md)
+- [Context map prototype-v0](docs/context-map-prototype-v0.md)
+
+Версионированные схемы и язык-независимые fixtures находятся в [`contracts/prototype-v0`](contracts/prototype-v0) и [`contracts/fixtures`](contracts/fixtures). Они фиксируют поведение прототипа, но не подтверждают производственную корректность формул.
 
 ## Стек
 

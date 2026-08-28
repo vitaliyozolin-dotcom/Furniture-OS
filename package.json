@@ -9,6 +9,7 @@
     "dev": "npm run dev --workspace @furniture-os/web",
     "build": "npm run build --workspace @furniture-os/web",
     "test": "npm run test --workspace @furniture-os/web",
+    "test:fixtures:update": "npm run test:fixtures:update --workspace @furniture-os/web",
     "test:e2e": "npm run test:e2e --workspace @furniture-os/web",
     "test:e2e:update": "npm run test:e2e:update --workspace @furniture-os/web",
     "preview": "npm run preview --workspace @furniture-os/web",
