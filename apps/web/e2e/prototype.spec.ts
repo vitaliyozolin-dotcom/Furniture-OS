@@ -16,5 +16,6 @@ test('shows the current estimate and supports the primary interactions', async (
 
 test('matches the prototype visual baseline', async ({ page }) => {
   await page.goto('./');
+  await expect(page.getByText(/64.302 ₽/)).toBeVisible();
   await expect(page).toHaveScreenshot('prototype-home.png', { fullPage: true });
 });

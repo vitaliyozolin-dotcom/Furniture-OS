@@ -1,13 +1,17 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
-import App from './App';
+import { afterEach, describe, expect, it } from 'vitest';
+import { PrototypePage } from './PrototypePage';
+import { renderWithProviders } from '../test/renderWithProviders';
+import { useDraftStore } from '../features/edit-cabinet/model/draftStore';
+
+afterEach(() => useDraftStore.getState().reset());
 
 describe('prototype screen', () => {
-  it('renders the characterized estimate, lead time, safety status, and progress', () => {
-    render(<App />);
+  it('renders the characterized estimate, lead time, safety status, and progress', async () => {
+    renderWithProviders(<PrototypePage />);
 
-    expect(screen.getByText(/64.302 ₽/)).toBeInTheDocument();
+    expect(await screen.findByText(/64.302 ₽/)).toBeInTheDocument();
     expect(screen.getByText('10')).toBeInTheDocument();
     expect(screen.getByText('Конструкция проверена')).toBeInTheDocument();
     expect(screen.getByText('1 из 4')).toBeInTheDocument();
@@ -15,8 +19,9 @@ describe('prototype screen', () => {
 
   it('toggles the facade preview', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderWithProviders(<PrototypePage />);
 
+    await screen.findByText(/64.302 ₽/);
     const preview = screen.getByRole('button', { name: 'Открыть или закрыть фасады' });
     expect(screen.getByText('Нажмите, чтобы открыть')).toBeInTheDocument();
     expect(preview.querySelector('.cabinet-stage')).not.toHaveClass('is-open');
@@ -29,8 +34,9 @@ describe('prototype screen', () => {
 
   it('preserves the current continue-button transition', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderWithProviders(<PrototypePage />);
 
+    await screen.findByText(/64.302 ₽/);
     await user.click(screen.getByRole('button', { name: /Продолжить создание/ }));
 
     expect(screen.getByRole('button', { name: /Переходим к размерам/ })).toBeInTheDocument();
