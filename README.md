@@ -28,9 +28,10 @@ Web и `/api` работают на одном origin за Nginx; БД и FPM н
 
 ## Разработка
 
-Dev имеет отдельное имя Compose-проекта `furniture-os-dev`, отдельный PostgreSQL volume и каталог файлов. Тесты используют ещё одну БД с суффиксом `_test` и `apps/api/var/test-files`. UID/GID dev-контейнера — 1000:1000; при другой локальной учётной записи скорректировать override.
+Dev имеет отдельное имя Compose-проекта `furniture-os-dev`, отдельный PostgreSQL volume и каталог файлов. Тесты используют ещё одну БД с суффиксом `_test` и `apps/api/var/test-files`. UID/GID dev-контейнера задаются через `LOCAL_UID`/`LOCAL_GID` (по умолчанию 1000:1000). В GitHub Actions они берутся из runner, чтобы Composer и Symfony могли писать в checkout.
 
 ```sh
+export LOCAL_UID="$(id -u)" LOCAL_GID="$(id -g)"
 docker compose -f infra/compose.yaml -f infra/compose.dev.yaml build api
 docker compose -f infra/compose.yaml -f infra/compose.dev.yaml run --rm --no-deps api composer install --no-interaction --prefer-dist
 docker compose -f infra/compose.yaml -f infra/compose.dev.yaml up -d --wait postgres api

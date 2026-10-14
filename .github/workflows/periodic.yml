@@ -11,6 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: cp infra/.env.example infra/.env
+      - name: Match dev container to checkout owner
+        run: |
+          echo "LOCAL_UID=$(id -u)" >> "$GITHUB_ENV"
+          echo "LOCAL_GID=$(id -g)" >> "$GITHUB_ENV"
       - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml build api
       - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml run --rm --no-deps api composer install --no-interaction --prefer-dist
       - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml up -d --wait postgres api
