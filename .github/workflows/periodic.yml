@@ -1,0 +1,21 @@
+name: Periodic domain mutation tests
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp infra/.env.example infra/.env
+      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml build api
+      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml run --rm --no-deps api composer install --no-interaction --prefer-dist
+      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml up -d --wait postgres api
+      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api composer test:prepare
+      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T -e XDEBUG_MODE=coverage api php -d memory_limit=1G -d pcov.enabled=0 vendor/bin/infection --threads=4 --no-progress
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: mutation-results, path: apps/api/var/infection*.log }

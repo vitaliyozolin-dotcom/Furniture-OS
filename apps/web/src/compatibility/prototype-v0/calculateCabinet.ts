@@ -1,4 +1,4 @@
-import type { CabinetConfig, CalculationResult, CutPart } from './types';
+import type { CabinetConfig, CalculationResult, CutPart } from '../../domain/types';
 
 const BOARD = 16;
 const GAP = 2;

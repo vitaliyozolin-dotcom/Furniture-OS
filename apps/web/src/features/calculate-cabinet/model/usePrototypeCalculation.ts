@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import type { CabinetConfig } from '../../../domain/types';
 import type { CalculationGateway } from '../api/CalculationGateway';
-import { localPrototypeCalculationGateway } from '../api/localPrototypeCalculationGateway';
+import { migrationCalculationGateway } from '../api/migrationCalculationGateway';
 
 export function usePrototypeCalculation(
   input: CabinetConfig,
-  gateway: CalculationGateway = localPrototypeCalculationGateway,
+  gateway: CalculationGateway = migrationCalculationGateway,
 ) {
   return useQuery({
     queryKey: ['prototype-calculation', input],

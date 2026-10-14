@@ -3,3 +3,14 @@ dist/
 test-results/
 playwright-report/
 *.tsbuildinfo
+vendor/
+apps/api/var/
+.env.local
+infra/.env
+coverage/
+.php-cs-fixer.cache
+backups/
+.deptrac.cache
+apps/api/config/reference.php
+__pycache__/
+*.pyc

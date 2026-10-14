@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculateCabinet } from './calculateCabinet';
+import { calculateCabinet } from '../compatibility/prototype-v0/calculateCabinet';
 import type { CabinetConfig } from './types';
 
 const base: CabinetConfig = {

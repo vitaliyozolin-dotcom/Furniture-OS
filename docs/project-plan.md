@@ -588,6 +588,11 @@ Furniture OS должен быть управляемой RFQ-площадкой
 4. Управляемая RFQ-площадка вместо открытого ценового аукциона.
 5. Отсутствие платежей и escrow в первом пилоте.
 
+## ADR реализации миграции
+
+- [Runtime, транспорт и открытая точка parity](adr/0003-migration-runtime-boundaries.md).
+- [Проверки и приёмка миграции](adr/0004-migration-acceptance.md).
+
 ## Официальные технические источники
 
 - [React с TypeScript](https://react.dev/learn/typescript)

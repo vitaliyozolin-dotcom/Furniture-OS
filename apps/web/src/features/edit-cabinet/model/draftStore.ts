@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { CabinetConfig } from '../../../domain/types';
-import { prototypeCabinetConfig } from '../../../pages/prototypeCabinetConfig';
+import { prototypeCabinetConfig } from '../../../entities/cabinet/model/prototypeCabinetConfig';
 
 interface DraftState {
   draft: CabinetConfig;

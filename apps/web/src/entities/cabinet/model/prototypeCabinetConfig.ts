@@ -1,4 +1,4 @@
-import type { CabinetConfig } from '../domain/types';
+import type { CabinetConfig } from '../../../domain/types';
 
 export const prototypeCabinetConfig: CabinetConfig = {
   width: 2400,

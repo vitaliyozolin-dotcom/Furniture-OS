@@ -1,13 +1,26 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import fixtures from '../../../../contracts/fixtures/prototype-v0.json';
 import { PrototypePage } from './PrototypePage';
 import { renderWithProviders } from '../test/renderWithProviders';
 import { useDraftStore } from '../features/edit-cabinet/model/draftStore';
 
-afterEach(() => useDraftStore.getState().reset());
+beforeEach(() => { vi.spyOn(globalThis, 'fetch').mockImplementation(async () => Response.json(fixtures[0].expected)); });
+afterEach(() => { useDraftStore.getState().reset(); vi.restoreAllMocks(); });
 
 describe('prototype screen', () => {
+  it('shows a network error without a local price', async () => {
+    vi.mocked(globalThis.fetch).mockRejectedValue(new TypeError('offline'));
+    renderWithProviders(<PrototypePage />);
+    expect(await screen.findByText('Расчёт недоступен')).toBeInTheDocument();
+    expect(screen.queryByText(/64.302 ₽/)).not.toBeInTheDocument();
+  });
+  it('shows the loading state while waiting for the API', () => {
+    vi.mocked(globalThis.fetch).mockImplementation(() => new Promise(() => {}));
+    renderWithProviders(<PrototypePage />);
+    expect(screen.getByText('Загрузка расчёта')).toBeInTheDocument();
+  });
   it('renders the characterized estimate, lead time, safety status, and progress', async () => {
     renderWithProviders(<PrototypePage />);
 
