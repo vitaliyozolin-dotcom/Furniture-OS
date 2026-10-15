@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://furniture-os.local/contracts/prototype-v0/result.schema.json",
+  "title": "PrototypeCalculationResultV0",
+  "description": "Compatibility result of the existing UI prototype. Values are preliminary and not production-authoritative.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["parts", "sheets", "hinges", "runners", "rods", "edgeMeters", "leadDays", "warnings", "costs"],
+  "properties": {
+    "parts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "width", "height", "quantity", "material"],
+        "properties": {
+          "name": { "type": "string" },
+          "width": { "type": "number" },
+          "height": { "type": "number" },
+          "quantity": { "type": "number" },
+          "material": { "enum": ["body", "back", "facade"] }
+        }
+      }
+    },
+    "sheets": { "type": "number" },
+    "hinges": { "type": "number" },
+    "runners": { "type": "number" },
+    "rods": { "type": "number" },
+    "edgeMeters": { "type": "number" },
+    "leadDays": { "type": "number" },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "costs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["materials", "hardware", "labor", "delivery", "margin", "total"],
+      "properties": {
+        "materials": { "type": "number" },
+        "hardware": { "type": "number" },
+        "labor": { "type": "number" },
+        "delivery": { "type": "number" },
+        "margin": { "type": "number" },
+        "total": { "type": "number" }
+      }
+    }
+  }
+}

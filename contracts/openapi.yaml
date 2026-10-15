@@ -1,0 +1,389 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Furniture OS migration API",
+    "version": "0.1.0",
+    "description": "prototype-v0 compatibility API; production rules are not approved.",
+    "license": {
+      "name": "Proprietary",
+      "identifier": "LicenseRef-Proprietary"
+    }
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "security": [],
+  "paths": {
+    "/health/live": {
+      "get": {
+        "operationId": "liveness",
+        "summary": "liveness",
+        "responses": {
+          "200": {
+            "description": "Healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "operationId": "readiness",
+        "summary": "readiness",
+        "responses": {
+          "200": {
+            "description": "Healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "PostgreSQL unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/prototype/v0/calculate": {
+      "post": {
+        "operationId": "calculatePrototypeCabinet",
+        "summary": "Compatibility estimate; not production validated",
+        "description": "Stateless preliminary prototype-v0 calculation. Transport safety: finite numbers with absolute value <= 1000000, 1–100 sections, JSON body <= 64 KiB. No projects or snapshots are persisted.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Correlation-ID",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9-]{1,64}$"
+            },
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrototypeCabinetInputV0"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Preliminary compatibility result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrototypeCalculationResultV0"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "RFC 9457 problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "RFC 9457 problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "RFC 9457 problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "RFC 9457 problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "RFC 9457 problem details",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PrototypeCabinetInputV0": {
+        "title": "PrototypeCabinetInputV0",
+        "description": "Compatibility input of the existing UI prototype. It is not a production ruleset.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "width",
+          "height",
+          "depth",
+          "sections",
+          "bodyMaterial",
+          "facadeMaterial",
+          "marginPercent",
+          "laborRate"
+        ],
+        "properties": {
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "depth": {
+            "type": "number"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "shelves",
+                "drawers"
+              ],
+              "properties": {
+                "type": {
+                  "enum": [
+                    "shelves",
+                    "wardrobe",
+                    "drawers"
+                  ]
+                },
+                "shelves": {
+                  "type": "number"
+                },
+                "drawers": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "bodyMaterial": {
+            "enum": [
+              "sonoma",
+              "cashmere",
+              "graphite"
+            ]
+          },
+          "facadeMaterial": {
+            "enum": [
+              "chipboard",
+              "mdf",
+              "mirror"
+            ]
+          },
+          "marginPercent": {
+            "type": "number"
+          },
+          "laborRate": {
+            "type": "number"
+          }
+        }
+      },
+      "PrototypeCalculationResultV0": {
+        "title": "PrototypeCalculationResultV0",
+        "description": "Compatibility result of the existing UI prototype. Values are preliminary and not production-authoritative.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "parts",
+          "sheets",
+          "hinges",
+          "runners",
+          "rods",
+          "edgeMeters",
+          "leadDays",
+          "warnings",
+          "costs"
+        ],
+        "properties": {
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "width",
+                "height",
+                "quantity",
+                "material"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "width": {
+                  "type": "number"
+                },
+                "height": {
+                  "type": "number"
+                },
+                "quantity": {
+                  "type": "number"
+                },
+                "material": {
+                  "enum": [
+                    "body",
+                    "back",
+                    "facade"
+                  ]
+                }
+              }
+            }
+          },
+          "sheets": {
+            "type": "number"
+          },
+          "hinges": {
+            "type": "number"
+          },
+          "runners": {
+            "type": "number"
+          },
+          "rods": {
+            "type": "number"
+          },
+          "edgeMeters": {
+            "type": "number"
+          },
+          "leadDays": {
+            "type": "number"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "costs": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "materials",
+              "hardware",
+              "labor",
+              "delivery",
+              "margin",
+              "total"
+            ],
+            "properties": {
+              "materials": {
+                "type": "number"
+              },
+              "hardware": {
+                "type": "number"
+              },
+              "labor": {
+                "type": "number"
+              },
+              "delivery": {
+                "type": "number"
+              },
+              "margin": {
+                "type": "number"
+              },
+              "total": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "Problem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "title",
+          "status",
+          "detail",
+          "correlationId"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "correlationId": {
+            "type": "string"
+          }
+        }
+      },
+      "Health": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "ready",
+              "unavailable"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

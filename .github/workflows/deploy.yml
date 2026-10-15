@@ -1,0 +1,84 @@
+name: Quality and deployment images
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci
+      - run: npm run api:check
+      - run: npm run check
+      - run: npm run test:coverage
+      - run: npm audit --audit-level=moderate
+      - run: git diff --check
+      - name: OpenAPI backward compatibility
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -n "$BASE_REF" ] && git cat-file -e "$BASE_REF:contracts/openapi.yaml" 2>/dev/null; then
+            git show "$BASE_REF:contracts/openapi.yaml" > contracts/openapi.previous.yaml
+            docker run --rm -v "$PWD/contracts:/specs:ro" tufin/oasdiff@sha256:2e32b0c600523a308f338a7d8456603f6caf47d9bbcdbd1fb366c21d80e42c5f breaking /specs/openapi.previous.yaml /specs/openapi.yaml --fail-on ERR
+          else
+            echo 'First published OpenAPI contract; no previous contract to compare.'
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: frontend-coverage, path: apps/web/coverage }
+  stack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: cp infra/.env.example infra/.env
+      - run: docker compose -f infra/compose.yaml build api web
+      - run: docker compose -f infra/compose.yaml up -d --wait postgres
+      - run: docker compose -f infra/compose.yaml run --rm --no-deps api php bin/console doctrine:migrations:migrate --no-interaction
+      - run: docker compose -f infra/compose.yaml up -d --wait
+      - run: python3 scripts/api-smoke.py http://127.0.0.1:8080
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env: { E2E_BASE_URL: 'http://127.0.0.1:8080/' }
+      - run: docker compose -f infra/compose.yaml exec -T api php bin/console app:storage:probe --write=ci-backup-probe
+      - run: python3 scripts/backup.py /tmp/furniture-ci-backup
+      - run: WEB_PORT=8081 python3 scripts/restore.py /tmp/furniture-ci-backup --project furniture-restore
+      - run: python3 scripts/api-smoke.py http://127.0.0.1:8081
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: playwright-report, path: apps/web/test-results }
+      - name: Container diagnostics
+        if: failure()
+        run: docker compose -f infra/compose.yaml logs --no-color --tail 100
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp infra/.env.example infra/.env
+      - name: Match dev container to checkout owner
+        run: |
+          echo "LOCAL_UID=$(id -u)" >> "$GITHUB_ENV"
+          echo "LOCAL_GID=$(id -g)" >> "$GITHUB_ENV"
+      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml build api
+      - run: python3 scripts/test-dev-container-permissions.py
+      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml run --rm --no-deps api composer install --no-interaction --prefer-dist
+      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml up -d --wait postgres api
+      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api php bin/console doctrine:migrations:migrate --no-interaction
+      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api composer quality
+      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api composer audit
+      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api composer test:coverage
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: backend-coverage, path: apps/api/var/coverage.xml }

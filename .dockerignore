@@ -1,0 +1,16 @@
+.git
+node_modules
+**/node_modules
+**/vendor
+**/var
+**/dist
+**/test-results
+**/playwright-report
+infra/.env
+.env.local
+backups
+
+**/.deptrac.cache
+**/.php-cs-fixer.cache
+apps/api/config/reference.php
+**/.env.local

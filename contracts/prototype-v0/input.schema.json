@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://furniture-os.local/contracts/prototype-v0/input.schema.json",
+  "title": "PrototypeCabinetInputV0",
+  "description": "Compatibility input of the existing UI prototype. It is not a production ruleset.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["width", "height", "depth", "sections", "bodyMaterial", "facadeMaterial", "marginPercent", "laborRate"],
+  "properties": {
+    "width": { "type": "number" },
+    "height": { "type": "number" },
+    "depth": { "type": "number" },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "shelves", "drawers"],
+        "properties": {
+          "type": { "enum": ["shelves", "wardrobe", "drawers"] },
+          "shelves": { "type": "number" },
+          "drawers": { "type": "number" }
+        }
+      }
+    },
+    "bodyMaterial": { "enum": ["sonoma", "cashmere", "graphite"] },
+    "facadeMaterial": { "enum": ["chipboard", "mdf", "mirror"] },
+    "marginPercent": { "type": "number" },
+    "laborRate": { "type": "number" }
+  }
+}

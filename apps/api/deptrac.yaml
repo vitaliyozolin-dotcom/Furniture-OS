@@ -1,0 +1,20 @@
+deptrac:
+    paths: [./src]
+    analyser:
+        types: [class, use, file]
+    layers:
+        - name: Domain
+          collectors: [{ type: classLike, value: '^App\\[^\\]+\\Domain\\' }]
+        - name: Application
+          collectors: [{ type: classLike, value: '^App\\[^\\]+\\Application\\' }]
+        - name: Infrastructure
+          collectors: [{ type: classLike, value: '^App\\[^\\]+\\Infrastructure\\' }]
+        - name: Presentation
+          collectors: [{ type: classLike, value: '^App\\[^\\]+\\Presentation\\' }]
+        - name: Vendor
+          collectors: [{ type: classLike, value: '^(Symfony|Doctrine|League|Brick|Psr|Monolog)\\' }]
+    ruleset:
+        Domain: []
+        Application: [Domain]
+        Infrastructure: [Domain, Application, Vendor]
+        Presentation: [Application, Vendor]

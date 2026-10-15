@@ -1,0 +1,21 @@
+parameters:
+    storage_root: '%env(STORAGE_ROOT)%'
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+    App\:
+        resource: '../src/'
+        exclude: '../src/{Kernel.php,Calculation/Domain/,Storage/Domain/}'
+    App\Storage\Application\FileStorage: '@App\Storage\Infrastructure\LocalFileStorage'
+    App\Storage\Infrastructure\LocalFileStorage:
+        arguments:
+            $root: '%storage_root%'
+    App\Storage\Application\FileMetadataRepository: '@App\Storage\Infrastructure\DoctrineFileMetadataRepository'
+    App\Platform\Application\Readiness: '@App\Platform\Infrastructure\PostgresReadiness'
+    App\Calculation\Domain\PrototypeGeometry: ~
+    App\Calculation\Domain\PrototypePricing: ~
+    App\Calculation\Presentation\CalculateController:
+        tags: ['controller.service_arguments']
+    App\Platform\Presentation\HealthController:
+        tags: ['controller.service_arguments']
