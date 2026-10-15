@@ -59,6 +59,8 @@ git diff --check
 
 Перед первым E2E: `npx playwright install --with-deps chromium`. Без `E2E_BASE_URL` Playwright поднимает Vite; backend dev должен работать для `/api` и readiness. Для такого запуска Vite проксирует также `/health`.
 
+Команда `composer test:coverage` очищает Symfony test cache без warmup перед измерением. Это включает ветви загружаемых при компиляции CLI-команд независимо от состояния локального кеша; CI использует ту же команду.
+
 CI проверяет frontend lint/typecheck/tests/coverage/build, OpenAPI lint/generation/breaking changes, backend PSR-12/PHPStan/Deptrac/tests, PostgreSQL migrations с пустой и заполненной предыдущей схемы, storage contracts, настоящий Nginx/API/PostgreSQL E2E и backup/restore. Mutation tests запускаются отдельно каждую неделю и вручную. Настройка branch protection в GitHub остаётся действием владельца репозитория: workflow сам по себе не запрещает обход проверок администратором.
 
 ## Файлы, backup и restore

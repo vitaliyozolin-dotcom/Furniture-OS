@@ -24,20 +24,22 @@
 | OpenAPI lint и актуальность generated types | успешно |
 | Frontend/межконтекстные архитектурные проверки, Deptrac | успешно, нарушений нет |
 | PHPStan level 6 / PSR-12 / Symfony container и YAML lint | успешно |
-| PHPUnit domain/application/integration/API | 40 тестов, успешно |
+| PHPUnit domain/application/integration/API | 44 теста, успешно |
 | Characterization | 13 конфигураций; полное сравнение JSON, числовой допуск указан ниже |
 | PostgreSQL | миграции пустой базы и заполненной предыдущей схемы; schema:validate успешно |
 | Storage contract | одинаковые binary/zero-byte/duplicate/missing/checksum/delete/key-safety проверки для in-memory и local |
 | Playwright | 6 desktop/mobile сценариев через настоящий Nginx + Symfony + PostgreSQL, включая API outage |
 | Visual regression | исходные desktop/mobile snapshots прошли без обновления |
 | Frontend coverage | строки 99,13%; ветви 93,22%; функции 100%; statements 98,60% |
-| Backend coverage (Xdebug) | строки 93,42%; ветви 88,17% |
+| Backend coverage (Xdebug) | строки 97,81%; ветви 88,81% |
 | Calculation Domain coverage | строки 100%; ветви 90,38% |
 | Mutation testing Calculation Domain | 291 из 315 мутаций обнаружены, MSI 92,38% |
 | npm audit / composer audit | известных уязвимостей не найдено |
 | API smoke, 100 запросов, concurrency 4 | до restore p95 около 2,8 мс; после restore около 3,5 мс; только локальное измерение |
 | Backup/restore drill | согласованный PostgreSQL dump + files tar + SHA-256 manifest; восстановление в отдельный пустой Compose project; probe row и checksum подтверждены; 13 конфигураций/100 запросов после restore успешны; перезапись непустого target отклонена |
 | git diff --check | успешно |
+
+Повторная проверка CI выявила зависимость branch inventory от Symfony test cache: у двух CLI-команд при прогретом кеше отсутствовали 16 непокрытых ветвей. Добавлены CommandTester-тесты readiness и storage probe (успех, недоступная БД, запись, проверка без записи, отсутствующий файл). Coverage теперь запускается после `cache:clear --env=test --no-warmup` одинаково локально и в CI. Холодный и прогретый запуски после исправления дают одинаковые per-file метрики: 262 покрытые ветви из 295, 44 теста / 244 assertions. Пороги 93,42% строк / 88,17% ветвей backend и критического домена не снижены.
 
 Измеренные baseline закреплены в Vitest и `scripts/check-coverage.php`, общий минимум плана превышен. Mutation gate — 90%. Xdebug path coverage потребовал 1 GiB memory limit; вложенные генераторы обхода storage заменены простым списком, после чего полный branch coverage выполняется успешно.
 

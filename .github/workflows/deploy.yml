@@ -78,8 +78,7 @@ jobs:
       - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api php bin/console doctrine:migrations:migrate --no-interaction
       - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api composer quality
       - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api composer audit
-      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api php -d memory_limit=1G -d pcov.enabled=0 -d xdebug.mode=coverage vendor/bin/phpunit --path-coverage --coverage-clover var/coverage.xml
-      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api php /app/scripts/check-coverage.php var/coverage.xml
+      - run: docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api composer test:coverage
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: backend-coverage, path: apps/api/var/coverage.xml }
