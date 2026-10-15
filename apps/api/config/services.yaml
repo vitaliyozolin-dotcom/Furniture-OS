@@ -6,7 +6,31 @@ services:
         autoconfigure: true
     App\:
         resource: '../src/'
-        exclude: '../src/{Kernel.php,Calculation/Domain/,Storage/Domain/}'
+        exclude: '../src/{Kernel.php,Calculation/Domain/,Storage/Domain/,Rendering/Application/{Image,RenderRequest,Generation}.php}'
+    _instanceof:
+        App\Rendering\Application\ImageGenerator:
+            tags: ['app.ai_image_generator']
+    App\Rendering\Application\RenderJournal: '@App\Rendering\Infrastructure\LocalRenderJournal'
+    App\Rendering\Infrastructure\LocalRenderJournal:
+        arguments:
+            $root: '%env(resolve:AI_RENDER_ROOT)%'
+    App\Rendering\Application\RenderCabinet:
+        arguments:
+            $generators: !tagged_iterator app.ai_image_generator
+            $enabled: '%env(bool:AI_ENABLED)%'
+            $provider: '%env(AI_PROVIDER)%'
+            $maxCostKopecks: '%env(int:AI_MAX_COST_KOPECKS)%'
+            $budgetKopecks: '%env(int:AI_BUDGET_KOPECKS)%'
+    app.ai_download_client:
+        class: Symfony\Component\HttpClient\NoPrivateNetworkHttpClient
+        arguments: ['@http_client']
+    App\Rendering\Infrastructure\PolzaNanoBanana:
+        arguments:
+            $downloads: '@app.ai_download_client'
+            $apiKey: '%env(POLZA_API_KEY)%'
+            $modelId: '%env(AI_NANO_BANANA_MODEL)%'
+            $imageHosts: '%env(AI_POLZA_IMAGE_HOSTS)%'
+            $timeoutSeconds: '%env(int:AI_HTTP_TIMEOUT_SECONDS)%'
     App\Storage\Application\FileStorage: '@App\Storage\Infrastructure\LocalFileStorage'
     App\Storage\Infrastructure\LocalFileStorage:
         arguments:

@@ -248,6 +248,8 @@ Domain rule
 
 ## 13. Этап 10 — AI-эксперимент, только после MVP-2
 
+Исключение от 15 октября 2026 года: владелец разрешил досрочную локальную интеграцию общего AI-порта и Nano Banana для проверки референсов и стоимости. Объём определён в [ADR-0005](adr/0005-local-ai-integration.md). Продуктовая привязка к ревизиям, UI и оценка воронки остаются на этом этапе.
+
 - Контрольный PNG из технического SVG.
 - Provider adapter и Messenger job.
 - Provider/model/promptVersion/input checksum/cost/retry/status.
