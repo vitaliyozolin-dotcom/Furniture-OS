@@ -10,6 +10,12 @@ concurrency:
   group: quality-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  local-development:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/test-local-compose.py
+      - run: python3 scripts/test-local-docker.py
   web:
     runs-on: ubuntu-latest
     steps:

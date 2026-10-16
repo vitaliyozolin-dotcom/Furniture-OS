@@ -50,8 +50,11 @@ describe('prototype screen', () => {
     renderWithProviders(<PrototypePage />);
 
     await screen.findByText(/64.302 ₽/);
-    await user.click(screen.getByRole('button', { name: /Продолжить создание/ }));
+    const continueLink = screen.getByRole('link', { name: /Продолжить создание/ });
+    expect(continueLink).toHaveAttribute('href', '/constructor');
+    continueLink.addEventListener('click', (event) => event.preventDefault());
+    await user.click(continueLink);
 
-    expect(screen.getByRole('button', { name: /Переходим к размерам/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Переходим к размерам/ })).toBeInTheDocument();
   });
 });

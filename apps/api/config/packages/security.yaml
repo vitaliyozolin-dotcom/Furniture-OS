@@ -1,5 +1,29 @@
 security:
+    password_hashers:
+        App\Identity\Infrastructure\SecurityAccount: auto
+    providers:
+        pilot_accounts:
+            id: App\Identity\Infrastructure\AccountProvider
     firewalls:
         main:
-            security: false
-# No user endpoints in the migration. Private storage has no public HTTP route.
+            lazy: true
+            provider: pilot_accounts
+            json_login:
+                check_path: /api/auth/login
+                username_path: email
+                password_path: password
+                success_handler: App\Identity\Infrastructure\LoginHandler
+                failure_handler: App\Identity\Infrastructure\LoginHandler
+            login_throttling:
+                max_attempts: 5
+                interval: '1 minute'
+            logout:
+                path: /api/auth/logout
+                invalidate_session: true
+                enable_csrf: false
+when@test:
+    security:
+        password_hashers:
+            App\Identity\Infrastructure\SecurityAccount:
+                algorithm: bcrypt
+                cost: 4

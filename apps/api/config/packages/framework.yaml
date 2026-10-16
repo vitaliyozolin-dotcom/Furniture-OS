@@ -2,6 +2,19 @@ framework:
     secret: '%env(APP_SECRET)%'
     handle_all_throwables: true
     http_method_override: false
+    csrf_protection: true
+    session:
+        name: FURNITURE_SESSION
+        handler_id: null
+        save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
+        cookie_httponly: true
+        cookie_secure: auto
+        cookie_samesite: lax
+    rate_limiter:
+        registration:
+            policy: sliding_window
+            limit: 5
+            interval: '15 minutes'
     php_errors:
         log: true
     router:
@@ -12,3 +25,10 @@ framework:
 when@test:
     framework:
         test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file
+when@dev:
+    framework:
+        rate_limiter:
+            registration:
+                limit: 50

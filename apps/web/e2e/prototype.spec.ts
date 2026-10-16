@@ -16,8 +16,8 @@ test('shows the current estimate and supports the primary interactions', async (
   await page.getByRole('button', { name: 'Открыть или закрыть фасады' }).click();
   await expect(page.getByText('Закрыть фасады')).toBeVisible();
 
-  await page.getByRole('button', { name: /Продолжить создание/ }).click();
-  await expect(page.getByRole('button', { name: /Переходим к размерам/ })).toBeVisible();
+  await page.getByRole('link', { name: /Продолжить создание/ }).click();
+  await expect(page.getByRole('heading', { name: 'Конструктор шкафа' })).toBeVisible();
 });
 
 test('matches the prototype visual baseline', async ({ page }) => {

@@ -1,0 +1,10 @@
+import calculations from '../../../../../contracts/fixtures/prototype-v0.json';
+import { calculationResultSchema } from '../../entities/calculation/model/calculationResultSchema';
+import { defaultCabinet } from '../../entities/cabinet/model/configuration';
+import type { CabinetProject, CabinetPublication } from '../../features/cabinet-workspace/api';
+export const account = { id: 'a'.repeat(32), email: 'user@example.test', name: 'Покупатель' };
+export const signedIn = { user: account, csrfToken: 'csrf-token' };
+export const anonymous = { user: null, csrfToken: 'csrf-anon' };
+export const project: CabinetProject = { id: 'b'.repeat(32), title: 'Шкаф в спальню', configuration: structuredClone(defaultCabinet), version: 1, updatedAt: '2026-10-16T00:00:00+00:00' };
+export const estimate = calculationResultSchema.parse(calculations[0].expected);
+export const publication: CabinetPublication = { token: 'c'.repeat(32), title: project.title, city: 'Москва', description: 'Пожелания к изготовлению', configuration: structuredClone(defaultCabinet), estimate, rulesetVersion: 'prototype-v0', publishedAt: '2026-10-16T00:00:00+00:00' };

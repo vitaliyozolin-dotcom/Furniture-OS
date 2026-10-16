@@ -1,0 +1,75 @@
+# Standalone local development; production uses infra/compose.yaml.
+name: furniture-os-local
+services:
+  postgres:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_DB: furniture
+      POSTGRES_USER: furniture
+      POSTGRES_PASSWORD: furniture-local
+    volumes:
+      - local_database:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U furniture -d furniture']
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/api.Dockerfile
+      target: development
+    user: '${LOCAL_UID:-1000}:${LOCAL_GID:-1000}'
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: 1
+      APP_SECRET: local-docker-development-only
+      DATABASE_URL: postgresql://furniture:furniture-local@postgres:5432/furniture?charset=utf8
+      STORAGE_ROOT: /app/apps/api/var/local-files
+      TEST_STORAGE_ROOT: /app/apps/api/var/local-test-files
+      COMPOSER_HOME: /tmp/composer
+    volumes:
+      - .:/app
+    command: [sh, /app/infra/docker/api-dev.sh]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, php, bin/console, app:ready]
+      start_period: 120s
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/web.dev.Dockerfile
+      args:
+        LOCAL_UID: '${LOCAL_UID:-1000}'
+        LOCAL_GID: '${LOCAL_GID:-1000}'
+    user: '${LOCAL_UID:-1000}:${LOCAL_GID:-1000}'
+    environment:
+      API_PROXY_TARGET: http://api:8000
+      NPM_CONFIG_CACHE: /tmp/npm
+    volumes:
+      - ./apps/web:/app/apps/web
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./contracts:/app/contracts:ro
+      - local_node_modules:/app/node_modules
+      - local_web_node_modules:/app/apps/web/node_modules
+    ports:
+      - '127.0.0.1:${LOCAL_WEB_PORT:-5174}:5173'
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, node, -e, 'fetch("http://127.0.0.1:5173/health/ready").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))']
+      start_period: 60s
+      interval: 5s
+      timeout: 5s
+      retries: 30
+volumes:
+  local_database:
+  local_node_modules:
+  local_web_node_modules:

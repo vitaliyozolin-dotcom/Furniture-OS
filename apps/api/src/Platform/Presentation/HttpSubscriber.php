@@ -30,7 +30,15 @@ final readonly class HttpSubscriber implements EventSubscriberInterface
     public function exception(ExceptionEvent $event): void
     {
         $exception = $event->getThrowable();
-        $status = $exception instanceof HttpExceptionInterface ? $exception->getStatusCode() : 500;
+        $status = match (true) {
+            $exception instanceof HttpExceptionInterface => $exception->getStatusCode(),
+            $exception instanceof \App\Shared\Application\Contract\AuthenticationRequired => 401,
+            $exception instanceof \OutOfBoundsException => 404,
+            $exception instanceof \DomainException => 409,
+            $exception instanceof \InvalidArgumentException => 422,
+            $exception instanceof \JsonException, $exception instanceof \Symfony\Component\HttpFoundation\Exception\JsonException => 400,
+            default => 500,
+        };
         $id = $event->getRequest()->attributes->get('correlationId');
         $this->logger->error('http_error', ['status' => $status, 'correlationId' => $id, 'exception' => $exception]);
         $event->setResponse(new JsonResponse([

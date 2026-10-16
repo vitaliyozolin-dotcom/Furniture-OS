@@ -8,10 +8,11 @@ UI-прототип распашного шкафа на React с серверн
 - [Результаты проверок и открытые пункты приёмки](docs/adr/0004-migration-acceptance.md)
 - [Границы runtime и точность compatibility pricing](docs/adr/0003-migration-runtime-boundaries.md)
 - [Словарь](docs/domain-glossary.md), [context map](docs/context-map-prototype-v0.md)
+- [Пилот: вход, конструктор и публикация шкафа](docs/cabinet-pilot.md)
 
 ## Полный стек
 
-Требуются Docker с Compose v2.24.4+ и Python 3 для эксплуатационных скриптов. Node.js 22/npm 10 нужны для frontend-разработки. PHP на хосте не требуется.
+Требуются Docker с Compose v2.24.4+ и Python 3 для эксплуатационных скриптов. Для локальной разработки через корневой Compose Node.js и PHP на хосте не требуются.
 
 ```sh
 cp infra/.env.example infra/.env
@@ -26,21 +27,32 @@ docker compose -f infra/compose.yaml up -d --wait
 
 Web и `/api` работают на одном origin за Nginx; БД и FPM не публикуются наружу. Данные PostgreSQL и приватные файлы живут в именованных volumes. Worker не запускается: фоновых пользовательских задач пока нет. GitHub Pages заменён проверками Docker-стека; новый frontend требует Symfony API.
 
-## Разработка
+## Разработка в Docker
 
-Dev имеет отдельное имя Compose-проекта `furniture-os-dev`, отдельный PostgreSQL volume и каталог файлов. Тесты используют ещё одну БД с суффиксом `_test` и `apps/api/var/test-files`. UID/GID dev-контейнера задаются через `LOCAL_UID`/`LOCAL_GID` (по умолчанию 1000:1000). В GitHub Actions они берутся из runner, чтобы Composer и Symfony могли писать в checkout.
+Из корня репозитория:
 
 ```sh
-export LOCAL_UID="$(id -u)" LOCAL_GID="$(id -g)"
-docker compose -f infra/compose.yaml -f infra/compose.dev.yaml build api
-docker compose -f infra/compose.yaml -f infra/compose.dev.yaml run --rm --no-deps api composer install --no-interaction --prefer-dist
-docker compose -f infra/compose.yaml -f infra/compose.dev.yaml up -d --wait postgres api
-docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api php bin/console doctrine:migrations:migrate --no-interaction
-npm ci
-npm run dev
+./scripts/dev.sh up --build -d --wait
 ```
 
-Vite проксирует `/api` на http://127.0.0.1:8000. Можно переопределить `API_PROXY_TARGET`. После изменения OpenAPI выполнить `npm run api:generate`; generated-файл вручную не редактируется.
+Открыть http://127.0.0.1:5174. Скрипт автоматически передаёт UID/GID владельца checkout. При UID/GID 1000:1000 можно также использовать `docker compose up --build -d --wait`. Если порт занят: `LOCAL_WEB_PORT=15174 ./scripts/dev.sh up --build -d --wait`.
+
+Корневой `compose.yaml` запускает отдельный проект `furniture-os-local`: Vite с горячей перезагрузкой, PHP 8.4/Symfony и PostgreSQL. При старте API устанавливаются Composer-зависимости и применяются миграции; frontend-зависимости поставляются в dev image и отдельных named volumes. При изменении package manifests/lockfile frontend повторно выполняет `npm ci` при перезапуске. БД доступна только внутри Docker, API — через Vite proxy `/api` и `/health` на `http://api:8000`. Production-конфигурация `infra/.env` для этого запуска не нужна.
+
+Исходники frontend и backend подключены через bind mounts: изменения видны без сборки images. Для изменений зависимостей/скриптов запуска повторить команду с `--build`. Если меняется UID/GID, frontend volumes старого владельца потребуется отдельно перенести или пересоздать; обычный `down` данные не удаляет.
+
+```sh
+./scripts/dev.sh logs -f api web
+./scripts/dev.sh exec -T api composer quality
+./scripts/dev.sh exec -T web npm run typecheck
+./scripts/dev.sh exec -T web npm test
+./scripts/dev.sh exec -T api php bin/console app:ai:render --help
+./scripts/dev.sh down
+```
+
+Локальный AI-ключ читается API из `apps/api/.env.local`; подробности — [локальная AI-интеграция](docs/local-ai.md). Node-контейнеру каталог backend с ключом не подключается. БД сохраняется в отдельном volume, файлы — в `apps/api/var/local-files`, тестовые файлы — в `apps/api/var/local-test-files`, AI-артефакты — в `apps/api/var/ai-renders`. Все эти каталоги исключены из Git. Остановка через `down` их сохраняет.
+
+Предыдущий backend-only запуск для CI и разработки с Node.js 22 на хосте остаётся доступен через `infra/compose.yaml` + `infra/compose.dev.yaml` (проект `furniture-os-dev`, API на `127.0.0.1:8000`). Он требует `infra/.env`, отдельного `composer install`, миграций и `npm run dev` на хосте. После изменения OpenAPI выполнить `npm run api:generate`; generated-файл вручную не редактируется.
 
 ## Проверки
 
@@ -63,7 +75,9 @@ git diff --check
 
 Команда `composer test:coverage` очищает Symfony test cache без warmup перед измерением. Это включает ветви загружаемых при компиляции CLI-команд независимо от состояния локального кеша; CI использует ту же команду.
 
-CI проверяет frontend lint/typecheck/tests/coverage/build, OpenAPI lint/generation/breaking changes, backend PSR-12/PHPStan/Deptrac/tests, PostgreSQL migrations с пустой и заполненной предыдущей схемы, storage contracts, настоящий Nginx/API/PostgreSQL E2E и backup/restore. Mutation tests запускаются отдельно каждую неделю и вручную. Настройка branch protection в GitHub остаётся действием владельца репозитория: workflow сам по себе не запрещает обход проверок администратором.
+Локальный Docker bootstrap с чистой копией checkout проверяется командой `python3 scripts/test-local-docker.py`; конфигурация — `python3 scripts/test-local-compose.py`. Первый тест создаёт собственный временный Compose-проект и удаляет только его тестовые volumes.
+
+CI проверяет локальный Docker bootstrap, frontend lint/typecheck/tests/coverage/build, OpenAPI lint/generation/breaking changes, backend PSR-12/PHPStan/Deptrac/tests, PostgreSQL migrations с пустой и заполненной предыдущей схемы, storage contracts, настоящий Nginx/API/PostgreSQL E2E и backup/restore. Mutation tests запускаются отдельно каждую неделю и вручную. Настройка branch protection в GitHub остаётся действием владельца репозитория: workflow сам по себе не запрещает обход проверок администратором.
 
 ## Файлы, backup и restore
 
@@ -93,4 +107,6 @@ API возвращает `X-Correlation-ID`; ошибки имеют `applicatio
 
 ## Текущие продуктовые границы
 
-Экран, открытие фасадов и кнопка продолжения сохранены. До подписанной parity оставлен выключенный флаг `VITE_ENABLE_PROTOTYPE_V0_FALLBACK`: для явного технического rollback можно собрать web с `--build-arg VITE_ENABLE_PROTOTYPE_V0_FALLBACK=true`. При обычной сборке движок исключается из bundle; отказ API не включает его автоматически. После приёмки parity флаг и compatibility runtime удаляются отдельным изменением. Форм размеров, входа, проектов/ревизий, документов, RFQ, предложений производителей, продуктового AI-сценария и 3D пока нет. Они реализуются по продуктовому плану после отдельной приёмки миграции и утверждения необходимых продуктовых правил. Отдельно разрешён и реализован локальный CLI-эксперимент AI; он не объявляет миграцию принятой.
+По согласованному исключению [ADR-0006](docs/adr/0006-cabinet-builder-pilot.md) добавлен пилот: вход/регистрация, конструктор распашного шкафа, личные проекты и публичная заявка по ссылке. В конструкторе можно менять размеры, секции, наполнение и материалы, открывать фасады и отменять изменения. Расчёт выполняется backend по демонстрационному `prototype-v0`; производственную пригодность и цену подтверждает изготовитель. Публикация фиксирует выбранную ревизию; ссылкой автор делится самостоятельно. Автоматической отправки производителям, предложений, документов, полноценного RFQ, продуктового AI-сценария и 3D пока нет.
+
+Техническая миграция ещё ожидает отдельной приёмки. До подписанной parity оставлен выключенный флаг `VITE_ENABLE_PROTOTYPE_V0_FALLBACK`: для явного технического rollback можно собрать web с `--build-arg VITE_ENABLE_PROTOTYPE_V0_FALLBACK=true`. При обычной сборке движок исключается из bundle; отказ API не включает его автоматически. После приёмки parity флаг и compatibility runtime удаляются отдельным изменением. Локальный CLI-эксперимент AI разрешён отдельно по ADR-0005.

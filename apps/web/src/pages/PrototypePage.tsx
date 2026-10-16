@@ -39,10 +39,10 @@ export function PrototypePage({ status = 'ready' }: PrototypePageProps) {
       />
       <EstimateCard total={result.costs.total} warnings={result.warnings} />
       <ProjectProgress currentStep={currentStep} />
-      <button className="primary-action" onClick={startJourney}>
+      <a href="/constructor" className="primary-action" onClick={startJourney}>
         <span>{started ? 'Переходим к размерам' : 'Продолжить создание'}</span>
         <b>→</b>
-      </button>
+      </a>
       <p className="next-step">Следующий шаг · Размеры шкафа</p>
       <BottomNavigation />
     </main>

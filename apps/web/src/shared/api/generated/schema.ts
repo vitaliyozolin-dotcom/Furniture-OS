@@ -58,6 +58,162 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Current account and CSRF token */
+        get: operations["authSession"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create an individual pilot account */
+        post: operations["register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign in using a server session */
+        post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign out and invalidate session */
+        post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cabinets/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Preliminary demonstration estimate; equal-width sections */
+        post: operations["previewCabinet"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List only current account projects */
+        get: operations["listProjects"];
+        put?: never;
+        /** Save a cabinet draft */
+        post: operations["createProject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Open own cabinet draft */
+        get: operations["getProject"];
+        /** Save own draft with optimistic version check */
+        put: operations["updateProject"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/{id}/publication": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish a manufacturing request by link from an immutable revision */
+        post: operations["publishCabinet"];
+        /** Withdraw own public manufacturing request */
+        delete: operations["unpublishCabinet"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/publications/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public immutable cabinet request; no account contacts */
+        get: operations["getPublication"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -123,8 +279,94 @@ export interface components {
             /** @enum {string} */
             status: "ok" | "ready" | "unavailable";
         };
+        Account: {
+            id: string;
+            /** Format: email */
+            email: string;
+            name: string;
+        };
+        AuthSession: {
+            user: components["schemas"]["Account"] | null;
+            csrfToken: string;
+        };
+        Registration: {
+            name: string;
+            /** Format: email */
+            email: string;
+            password: string;
+        };
+        Login: {
+            /** Format: email */
+            email: string;
+            password: string;
+        };
+        CabinetConfiguration: {
+            width: number;
+            height: number;
+            depth: number;
+            sections: {
+                /** @enum {string} */
+                type: "shelves" | "wardrobe" | "drawers";
+                shelves: number;
+                drawers: number;
+            }[];
+            /** @enum {string} */
+            bodyMaterial: "sonoma" | "cashmere" | "graphite";
+            /** @enum {string} */
+            facadeMaterial: "chipboard" | "mdf" | "mirror";
+        };
+        CabinetPreview: {
+            configuration: components["schemas"]["CabinetConfiguration"];
+            estimate: components["schemas"]["PrototypeCalculationResultV0"];
+            /** @constant */
+            rulesetVersion: "prototype-v0";
+        };
+        ProjectWrite: {
+            title: string;
+            configuration: components["schemas"]["CabinetConfiguration"];
+        };
+        ProjectUpdate: {
+            title: string;
+            configuration: components["schemas"]["CabinetConfiguration"];
+            expectedVersion: number;
+        };
+        CabinetProject: {
+            id: string;
+            title: string;
+            configuration: components["schemas"]["CabinetConfiguration"];
+            version: number;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        PublicationWrite: {
+            city: string;
+            description: string;
+            expectedVersion: number;
+        };
+        CabinetPublication: {
+            token: string;
+            title: string;
+            city: string;
+            description: string;
+            configuration: components["schemas"]["CabinetConfiguration"];
+            estimate: components["schemas"]["PrototypeCalculationResultV0"];
+            /** @constant */
+            rulesetVersion: "prototype-v0";
+            /** Format: date-time */
+            publishedAt: string;
+        };
     };
-    responses: never;
+    responses: {
+        /** @description Request rejected (RFC 9457) */
+        PilotProblem: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+    };
     parameters: never;
     requestBodies: never;
     headers: never;
@@ -250,6 +492,346 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+        };
+    };
+    authSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AuthSession */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSession"];
+                };
+            };
+            400: components["responses"]["PilotProblem"];
+        };
+    };
+    register: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Registration"];
+            };
+        };
+        responses: {
+            /** @description Account */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Account"];
+                };
+            };
+            400: components["responses"]["PilotProblem"];
+            403: components["responses"]["PilotProblem"];
+            409: components["responses"]["PilotProblem"];
+            413: components["responses"]["PilotProblem"];
+            422: components["responses"]["PilotProblem"];
+            429: components["responses"]["PilotProblem"];
+        };
+    };
+    login: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Login"];
+            };
+        };
+        responses: {
+            /** @description Account */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Account"];
+                };
+            };
+            400: components["responses"]["PilotProblem"];
+            401: components["responses"]["PilotProblem"];
+            403: components["responses"]["PilotProblem"];
+            409: components["responses"]["PilotProblem"];
+            413: components["responses"]["PilotProblem"];
+            422: components["responses"]["PilotProblem"];
+            429: components["responses"]["PilotProblem"];
+        };
+    };
+    logout: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["PilotProblem"];
+            403: components["responses"]["PilotProblem"];
+            409: components["responses"]["PilotProblem"];
+            413: components["responses"]["PilotProblem"];
+            422: components["responses"]["PilotProblem"];
+        };
+    };
+    previewCabinet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CabinetConfiguration"];
+            };
+        };
+        responses: {
+            /** @description CabinetPreview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CabinetPreview"];
+                };
+            };
+            400: components["responses"]["PilotProblem"];
+        };
+    };
+    listProjects: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CabinetProject */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CabinetProject"][];
+                };
+            };
+            400: components["responses"]["PilotProblem"];
+            401: components["responses"]["PilotProblem"];
+            404: components["responses"]["PilotProblem"];
+        };
+    };
+    createProject: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectWrite"];
+            };
+        };
+        responses: {
+            /** @description CabinetProject */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CabinetProject"];
+                };
+            };
+            400: components["responses"]["PilotProblem"];
+            401: components["responses"]["PilotProblem"];
+            403: components["responses"]["PilotProblem"];
+            404: components["responses"]["PilotProblem"];
+            409: components["responses"]["PilotProblem"];
+            413: components["responses"]["PilotProblem"];
+            422: components["responses"]["PilotProblem"];
+        };
+    };
+    getProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CabinetProject */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CabinetProject"];
+                };
+            };
+            400: components["responses"]["PilotProblem"];
+            401: components["responses"]["PilotProblem"];
+            404: components["responses"]["PilotProblem"];
+        };
+    };
+    updateProject: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectUpdate"];
+            };
+        };
+        responses: {
+            /** @description CabinetProject */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CabinetProject"];
+                };
+            };
+            400: components["responses"]["PilotProblem"];
+            401: components["responses"]["PilotProblem"];
+            403: components["responses"]["PilotProblem"];
+            404: components["responses"]["PilotProblem"];
+            409: components["responses"]["PilotProblem"];
+            413: components["responses"]["PilotProblem"];
+            422: components["responses"]["PilotProblem"];
+        };
+    };
+    publishCabinet: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublicationWrite"];
+            };
+        };
+        responses: {
+            /** @description CabinetPublication */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CabinetPublication"];
+                };
+            };
+            400: components["responses"]["PilotProblem"];
+            401: components["responses"]["PilotProblem"];
+            403: components["responses"]["PilotProblem"];
+            404: components["responses"]["PilotProblem"];
+            409: components["responses"]["PilotProblem"];
+            413: components["responses"]["PilotProblem"];
+            422: components["responses"]["PilotProblem"];
+        };
+    };
+    unpublishCabinet: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["PilotProblem"];
+            401: components["responses"]["PilotProblem"];
+            403: components["responses"]["PilotProblem"];
+            404: components["responses"]["PilotProblem"];
+            409: components["responses"]["PilotProblem"];
+            413: components["responses"]["PilotProblem"];
+            422: components["responses"]["PilotProblem"];
+        };
+    };
+    getPublication: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CabinetPublication */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CabinetPublication"];
+                };
+            };
+            400: components["responses"]["PilotProblem"];
+            404: components["responses"]["PilotProblem"];
         };
     };
 }

@@ -14,6 +14,21 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Storage/Infrastructure/Persistence'
                 prefix: 'App\Storage\Infrastructure\Persistence'
                 is_bundle: false
+            Identity:
+                type: attribute
+                dir: '%kernel.project_dir%/src/Identity/Infrastructure/Persistence'
+                prefix: 'App\Identity\Infrastructure\Persistence'
+                is_bundle: false
+            Project:
+                type: attribute
+                dir: '%kernel.project_dir%/src/Project/Infrastructure/Persistence'
+                prefix: 'App\Project\Infrastructure\Persistence'
+                is_bundle: false
+            Marketplace:
+                type: attribute
+                dir: '%kernel.project_dir%/src/Marketplace/Infrastructure/Persistence'
+                prefix: 'App\Marketplace\Infrastructure\Persistence'
+                is_bundle: false
 when@test:
     doctrine:
         dbal:

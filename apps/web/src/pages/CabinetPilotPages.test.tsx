@@ -1,0 +1,28 @@
+import { fireEvent, screen } from '@testing-library/react';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { Routes, Route } from 'react-router-dom';
+import { AuthPage, ConstructorPage, ProjectsPage, PublicationPage } from './CabinetPilotPages';
+import { sessionApi } from '../features/session';
+import { workspaceApi } from '../features/cabinet-workspace/api';
+import { renderPilot } from '../test/pilot/render';
+import { signedIn, anonymous, project, publication } from '../test/pilot/fixtures';
+vi.mock('../features/cabinet-workspace/CabinetEditor', () => ({ CabinetEditor: ({ project: item }: { project: { title: string } | null }) => <p>Редактор: {item?.title ?? 'Новый шкаф'}</p> }));
+beforeEach(() => { vi.spyOn(sessionApi, 'session').mockResolvedValue(signedIn); vi.spyOn(workspaceApi, 'project').mockResolvedValue(project); vi.spyOn(workspaceApi, 'projects').mockResolvedValue([project]); vi.spyOn(workspaceApi, 'publication').mockResolvedValue(publication); });
+afterEach(() => vi.restoreAllMocks());
+function constructor(path: string) { renderPilot(<Routes><Route path="/constructor/:id?" element={<ConstructorPage />} /></Routes>, path); }
+it('opens a new constructor or own saved project', async () => { constructor('/constructor'); expect(await screen.findByText('Редактор: Новый шкаф')).toBeInTheDocument(); });
+it('opens the saved project only after session verification', async () => { constructor(`/constructor/${project.id}`); expect(await screen.findByText(`Редактор: ${project.title}`)).toBeInTheDocument(); });
+it('waits for session when opening a private project', () => { vi.mocked(sessionApi.session).mockReturnValue(new Promise(() => {})); constructor(`/constructor/${project.id}`); expect(screen.getByText('Открываем проект…')).toBeInTheDocument(); });
+it('requires sign-in before reading a private project', async () => { vi.mocked(sessionApi.session).mockResolvedValue(anonymous); constructor(`/constructor/${project.id}`); expect(await screen.findByText('Войдите, чтобы открыть проект')).toBeInTheDocument(); expect(workspaceApi.project).not.toHaveBeenCalled(); });
+it('shows project loading and API failure', async () => { vi.mocked(workspaceApi.project).mockReturnValue(new Promise(() => {})); constructor(`/constructor/${project.id}`); expect(await screen.findByText('Загружаем шкаф…')).toBeInTheDocument(); });
+it('reports a private project that is not available', async () => { vi.mocked(workspaceApi.project).mockRejectedValue(new Error('Проект не найден')); constructor('/constructor/missing'); expect(await screen.findByRole('alert')).toHaveTextContent('Проект не найден'); });
+it('renders projects while checking the session', () => { vi.mocked(sessionApi.session).mockReturnValue(new Promise(() => {})); renderPilot(<ProjectsPage />); expect(screen.getByText('Проверяем вход…')).toBeInTheDocument(); });
+it('offers registration to anonymous visitors', async () => { vi.mocked(sessionApi.session).mockResolvedValue(anonymous); renderPilot(<ProjectsPage />); expect(await screen.findByText('Сохраняйте свои проекты')).toBeInTheDocument(); });
+it('renders project loading', async () => { vi.mocked(workspaceApi.projects).mockReturnValue(new Promise(() => {})); renderPilot(<ProjectsPage />); expect(await screen.findByText('Загружаем проекты…')).toBeInTheDocument(); });
+it('renders an empty project list', async () => { vi.mocked(workspaceApi.projects).mockResolvedValue([]); renderPilot(<ProjectsPage />); expect(await screen.findByText('Здесь будет ваш первый шкаф')).toBeInTheDocument(); });
+it('renders existing projects and their private links', async () => { renderPilot(<ProjectsPage />); expect(await screen.findByRole('link', { name: 'Открыть проект' })).toHaveAttribute('href', `/constructor/${project.id}`); });
+it('reports a project list error', async () => { vi.mocked(workspaceApi.projects).mockRejectedValue(new Error('Сервис недоступен')); renderPilot(<ProjectsPage />); expect(await screen.findByRole('alert')).toHaveTextContent('Сервис недоступен'); });
+it('renders publication loading', () => { vi.mocked(workspaceApi.publication).mockReturnValue(new Promise(() => {})); renderPilot(<PublicationPage />); expect(screen.getByText('Открываем заявку…')).toBeInTheDocument(); });
+it('reports a withdrawn or missing publication', async () => { vi.mocked(workspaceApi.publication).mockRejectedValue(new Error('Заявка снята')); renderPilot(<PublicationPage />); expect(await screen.findByRole('alert')).toHaveTextContent('Заявка снята'); });
+it('renders the immutable public cabinet and selectable sharing link', async () => { renderPilot(<Routes><Route path="/p/:token" element={<PublicationPage />} /></Routes>, `/p/${publication.token}`); const link = await screen.findByLabelText('Ссылка на заявку'); fireEvent.focus(link); expect(link).toHaveValue(`${window.location.origin}/p/${publication.token}`); expect(screen.getByText(publication.description)).toBeInTheDocument(); expect(screen.queryByText('user@example.test')).not.toBeInTheDocument(); });
+it('opens both authentication forms in the page shell', () => { renderPilot(<><AuthPage mode="login" /><AuthPage mode="register" /></>); expect(screen.getByRole('heading', { name: 'С возвращением' })).toBeInTheDocument(); expect(screen.getByRole('heading', { name: 'Создать аккаунт' })).toBeInTheDocument(); });

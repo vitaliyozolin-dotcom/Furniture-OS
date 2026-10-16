@@ -6,7 +6,7 @@ services:
         autoconfigure: true
     App\:
         resource: '../src/'
-        exclude: '../src/{Kernel.php,Calculation/Domain/,Storage/Domain/,Rendering/Application/{Image,RenderRequest,Generation}.php}'
+        exclude: '../src/{Kernel.php,*/Domain/,*/Infrastructure/Persistence/,Rendering/Application/{Image,RenderRequest,Generation}.php}'
     _instanceof:
         App\Rendering\Application\ImageGenerator:
             tags: ['app.ai_image_generator']
@@ -42,4 +42,23 @@ services:
     App\Calculation\Presentation\CalculateController:
         tags: ['controller.service_arguments']
     App\Platform\Presentation\HealthController:
+        tags: ['controller.service_arguments']
+    App\Identity\Domain\Accounts: '@App\Identity\Infrastructure\DoctrineAccounts'
+    App\Identity\Application\PasswordHash: '@App\Identity\Infrastructure\SymfonyPasswordHash'
+    App\Identity\Application\Contract\CurrentActor: '@App\Identity\Infrastructure\SessionActor'
+    App\Identity\Presentation\AuthController:
+        tags: ['controller.service_arguments']
+        arguments:
+            $registrationLimiter: '@limiter.registration'
+    App\Cabinet\Application\Contract\CabinetConfigurator: '@App\Cabinet\Application\ConfigureCabinet'
+    App\Calculation\Application\Contract\CabinetEstimator: '@App\Calculation\Application\PreliminaryCabinetEstimate'
+    App\Project\Domain\Projects: '@App\Project\Infrastructure\DoctrineProjects'
+    App\Project\Domain\Revisions: '@App\Project\Infrastructure\DoctrineRevisions'
+    App\Project\Application\Contract\ProjectRevisions: '@App\Project\Application\ProjectWorkspace'
+    App\Marketplace\Domain\Publications: '@App\Marketplace\Infrastructure\DoctrinePublications'
+    App\Cabinet\Presentation\CabinetController:
+        tags: ['controller.service_arguments']
+    App\Project\Presentation\ProjectController:
+        tags: ['controller.service_arguments']
+    App\Marketplace\Presentation\PublicationController:
         tags: ['controller.service_arguments']

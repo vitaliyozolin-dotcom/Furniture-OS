@@ -4,7 +4,7 @@
 
 ## Настройка
 
-Сначала запустить dev API и установить зависимости по README. Настройки находятся в `apps/api/.env`; настоящий ключ задать в `apps/api/.env.local`, который исключён из Git. Пустой файл для локального ключа подготовлен; для нового clone можно скопировать `.env.local.example`.
+Сначала запустить локальный стек: `./scripts/dev.sh up --build -d --wait` из корня репозитория. Зависимости и миграции устанавливаются автоматически. Настройки находятся в `apps/api/.env`; настоящий ключ задать в `apps/api/.env.local`, который исключён из Git. Пустой файл для локального ключа подготовлен; для нового clone можно скопировать `.env.local.example`.
 
 ```dotenv
 AI_ENABLED=1
@@ -34,7 +34,7 @@ POLZA_API_KEY=ваш_ключ_из_личного_кабинета_Polza
 Из корня репозитория:
 
 ```sh
-docker compose --env-file infra/.env -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api \
+./scripts/dev.sh exec -T api \
   php bin/console app:ai:render var/ai-reference.png \
   'Матовый белый корпус, фасады под дуб, нейтральный интерьер, дневной свет' \
   --resolution=1K --output=var/ai-concept.png --wait=180
@@ -63,8 +63,8 @@ docker compose --env-file infra/.env -f infra/compose.yaml -f infra/compose.dev.
 HTTP-контракт сверялся с [официальным OpenAPI Polza](https://polza.ai/api/openapi.json), [Nano Banana Media guide](https://polza.ai/docs/gaidy/nanobanano-2) и [GET Media Status](https://polza.ai/docs/api-reference/media/status). Используется общий `/api/v1/media`: `async: true`, одно изображение, PNG, Base64-референс; готовый файл берётся из `data.url`. Контракт-тесты не заменяют smoke с реальным ключом.
 
 ```sh
-docker compose --env-file infra/.env -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api composer quality
-docker compose --env-file infra/.env -f infra/compose.yaml -f infra/compose.dev.yaml exec -T api composer test:coverage
+./scripts/dev.sh exec -T api composer quality
+./scripts/dev.sh exec -T api composer test:coverage
 ```
 
 Все автоматические тесты используют mock HTTP и временные каталоги, не оплачивают генерацию и не требуют настоящего API-ключа.
